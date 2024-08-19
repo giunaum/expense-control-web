@@ -1,0 +1,96 @@
+<p-toolbar styleClass="mb-4">
+  <ng-template pTemplate="left">
+    <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+  </ng-template>
+</p-toolbar>
+
+<p-table #dt
+         [value]="expense"
+         [rows]="10"
+         [paginator]="true"
+         [globalFilterFields]="['id', 'personName','description','dateTime','amount','tags']"
+         [rowHover]="true" dataKey="id"
+         currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas" [showCurrentPageReport]="true">
+  <ng-template pTemplate="caption">
+    <div class="flex align-items-center justify-content-between">
+      <h5 class="m-0">Gerenciar Gastos</h5>
+      <span class="p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Pesquisar..." />
+            </span>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th scope="col" pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon></th>
+      <th scope="col" pSortableColumn="personName">Nome <p-sortIcon field="personName"></p-sortIcon></th>
+      <th scope="col" pSortableColumn="description">Descrição <p-sortIcon field="description"></p-sortIcon></th>
+      <th scope="col" pSortableColumn="dateTime">Data/Hora <p-sortIcon field="dateTime"></p-sortIcon></th>
+      <th scope="col" pSortableColumn="amount">Valor <p-sortIcon field="amount"></p-sortIcon></th>
+      <th scope="col" pSortableColumn="tags">Tags <p-sortIcon field="tags"></p-sortIcon></th>
+      <th scope="col"></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-spent>
+    <tr>
+      <td>{{spent.id}}</td>
+      <td>{{spent.personName}}</td>
+      <td>{{spent.description}}</td>
+      <td>{{spent.dateTime | date: 'dd/MM/yyyy HH:mm:ss'}}</td>
+      <td>{{spent.amount | currency:'BRL'}}</td>
+      <td>{{spent.tags}}</td>
+      <td>
+        <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editSpent(spent)"></button>
+        <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteSpent(spent)"></button>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="summary">
+    <div class="flex align-items-center justify-content-between">
+      No total são {{expense ? expense.length : 0 }} gastos.
+    </div>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="spentDialog" [style]="{width: '450px'}" header="Detalhes do Gasto" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="p-field">
+      <label for="personName">Nome</label>
+      <input type="text" pInputText id="personName" [(ngModel)]="spent.personName" required autofocus />
+      <small class="p-error" *ngIf="submitted && !spent.personName">Nome é obrigatório.</small>
+    </div>
+
+    <div class="p-field">
+      <label for="description">Descrição</label>
+      <textarea id="description" pInputTextarea [(ngModel)]="spent.description" required rows="3" cols="20"></textarea>
+      <small class="p-error" *ngIf="submitted && !spent.description">Descrição é obrigatório.</small>
+    </div>
+
+    <div class="p-field">
+      <label for="dateTime">Data/Hora</label>
+      <p-calendar #dateTimeElement id="dateTime" inputId="calendar-24h" [(ngModel)]="spent.dateTime" [showTime]="true" required [hourFormat]="24" dateFormat="dd/mm/yy"/>
+      <small class="p-error" *ngIf="submitted && !spent.dateTime">Data/Hora é obrigatório.</small>
+    </div>
+
+    <div class="p-formgrid p-grid">
+      <div class="p-field p-col">
+        <label for="amount">Valor</label>
+        <p-inputNumber id="amount" [(ngModel)]="spent.amount" required mode="currency" currency="BRL" locale="pt-BR"></p-inputNumber>
+        <small class="p-error" *ngIf="submitted && !spent.amount">Valor é obrigatório.</small>
+      </div>
+
+      <div class="p-field">
+        <label for="tags">Tags</label>
+        <input type="text" pInputText id="tags" [(ngModel)]="spent.tags" required />
+        <small class="p-error" *ngIf="submitted && !spent.tags">Tags é obrigatório.</small>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" (click)="saveSpent()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
